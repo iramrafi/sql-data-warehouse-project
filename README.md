@@ -26,7 +26,7 @@ Develop a modern **data warehouse** using SQL Server to consolidate sales data, 
 
 ## Data Sources
 
-CSV files from two systems: CRM and ERP
+CSV files from two systems: CRM(Customer Relationship Management) and ERP(Enterprise Resource Planning)
 
 Imported and loaded into the Bronze layer
 
