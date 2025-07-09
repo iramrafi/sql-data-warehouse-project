@@ -108,6 +108,23 @@ WHERE SUBSTRING(prd_key, 7, LEN(prd_key)) NOT IN (SELECT sls_prd_key FROM bronze
 SELECT prd_nm FROM bronze.crm_prd_info WHERE prd_nm != TRIM(prd_nm);
 SELECT prd_cost FROM bronze.crm_prd_info WHERE prd_cost < 0 OR prd_cost IS NULL;
 
+/*
+Conditions: 
+1.start date should be smaller than the end date and end of the first history should be younger than the start of the next record.
+2.Each Record must has a start date
+3. it's ok to have start date without end date
+*/
+
+/*
+Solution1: switch start date and end date
+issue: dates are overlapping
+
+Solution 2: 
+Drive the end date from the start date
+End date = Start of the 'NEXT' record - 1
+
+*/
+
 -- Cleaned product info with standardized product lines and fixed end date
 SELECT
     prd_id,
@@ -149,6 +166,12 @@ SELECT *
 FROM bronze.crm_sales_details
 WHERE sls_cust_id NOT IN (SELECT cst_id FROM silver.crm_cust_info);
 
+/*
+NOTE:
+1.Negative Numbers and Zero can't be cast to date
+2.Check for dates column sls_order_dt, sls_ship_dt, sls_due_dt		
+*/
+
 -- Validate sls_order_dt: check for 0, non-8-digit length, or out-of-range values
 SELECT NULLIF(sls_order_dt, 0) AS sls_order_dt
 FROM bronze.crm_sales_details
@@ -183,6 +206,14 @@ WHERE sls_sales != sls_quantity * sls_price
    OR sls_sales IS NULL OR sls_quantity IS NULL OR sls_price IS NULL
    OR sls_sales <= 0 OR sls_quantity <= 0 OR sls_price <= 0
 ORDER BY sls_sales, sls_quantity, sls_price;
+
+/*
+Rule 
+if the sales is negative, zero or null. drive it using quantity and price
+if the price is zero or null then drive it using Sales and Quantity
+if price is negative, convert it to a positive value
+
+*/
 
 -- Fix business rule violations: derive missing or incorrect sales/price values
 SELECT DISTINCT
