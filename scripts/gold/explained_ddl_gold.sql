@@ -3,6 +3,7 @@
 -- Create Dimension: gold.dim_customers
 -- =============================================================================
 
+
 --Here we are joining three different tables crm_cust_info, erp_cust_az12, erp_loc_a101 as a single object
 
 select 
@@ -348,3 +349,23 @@ LEFT JOIN gold.dim_customers cu
     ON sd.sls_cust_id = cu.customer_id;
 GO
 
+
+--Quality Check
+select * from gold.fact_sales;
+
+
+/*
+Fact Check
+Check if all dimensions tables can successfully join to the fact table
+*/
+
+SELECT *
+FROM gold.fact_sales s
+LEFT JOIN gold.dim_customers c
+ON s.customer_key = c.customer_key
+where c.customer_key is null;
+
+/*
+NOTE:
+In star schema, The Relationship between fact and dimension table is 1 to Many
+*/
